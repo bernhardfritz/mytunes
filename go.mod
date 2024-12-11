@@ -1,6 +1,6 @@
 module github.com/bernhardfritz/gotunes
 
-go 1.23.4
+go 1.23.2
 
 require rsc.io/quote v1.5.2
 
