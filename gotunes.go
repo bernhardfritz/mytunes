@@ -1,13 +1,13 @@
 package main
 
 import (
-  "fmt"
+	"fmt"
 
-  "github.com/bernhardfritz/gotunes/greeter"
-  "rsc.io/quote"
+	"github.com/bernhardfritz/gotunes/greeter"
+	"rsc.io/quote"
 )
 
 func main() {
-  fmt.Println(greeter.Greet("Bernhard"))
-  fmt.Println(quote.Hello())
+	fmt.Println(greeter.Greet("Bernhard"))
+	fmt.Println(quote.Hello())
 }
