@@ -14,18 +14,10 @@ import (
 	"github.com/bernhardfritz/gotunes/itertools"
 )
 
-type Directory struct {
-	Name string
-}
-
-type File struct {
-	Name string
-}
-
 type Playlist struct {
 	Path        string
-	Directories []Directory
-	Files       []File
+	Directories []string
+	Files       []string
 }
 
 func loggingHandler(handler http.Handler) http.Handler {
@@ -51,26 +43,6 @@ func isSlashRune(r rune) bool {
 	return r == '/' || r == '\\'
 }
 
-func isDirectory(dirEntry os.DirEntry) bool {
-	return dirEntry.IsDir()
-}
-
-func toDirectory(dirEntry os.DirEntry) Directory {
-	return Directory{
-		Name: dirEntry.Name(),
-	}
-}
-
-func isFile(dirEntry os.DirEntry) bool {
-	return !dirEntry.IsDir()
-}
-
-func toFile(dirEntry os.DirEntry) File {
-	return File{
-		Name: dirEntry.Name(),
-	}
-}
-
 func interceptor(res http.ResponseWriter, req *http.Request) {
 	if containsDotDot(req.URL.Path) {
 		http.Error(res, "invalid URL path", http.StatusBadRequest)
@@ -93,8 +65,8 @@ func interceptor(res http.ResponseWriter, req *http.Request) {
 		}
 		playlist := Playlist{
 			Path:        path.Dir(req.URL.Path),
-			Directories: slices.Collect(itertools.Map(toDirectory, itertools.Filter(isDirectory, slices.Values(dirEntries)))),
-			Files:       slices.Collect(itertools.Map(toFile, itertools.Filter(isFile, slices.Values(dirEntries)))),
+			Directories: slices.Collect(itertools.Map(os.DirEntry.Name, itertools.Filter(os.DirEntry.IsDir, slices.Values(dirEntries)))),
+			Files:       slices.Collect(itertools.Map(os.DirEntry.Name, itertools.Filter(itertools.Negate(os.DirEntry.IsDir), slices.Values(dirEntries)))),
 		}
 		err = tmpl.Execute(res, playlist)
 		if err != nil {
