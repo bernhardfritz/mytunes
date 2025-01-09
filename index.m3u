@@ -1,5 +1,6 @@
+#EXTM3U
 {{ range .Directories }}#EXTINF:-1,{{ .Name }}/
-/{{ .Name }}.m3u
+{{ PathJoin $.Path .Name "index.m3u" }}
 {{ end }}{{ range .Files }}#EXTINF:-1,{{ .Name }}
-/{{ .NameWithoutExtension }}.m3u8
+{{ PathJoin $.Path .Name }}.m3u8
 {{ end }}

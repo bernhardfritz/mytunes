@@ -9,8 +9,9 @@ RUN go mod download && go mod verify
 COPY . .
 RUN go build -v -o /usr/local/bin ./...
 
-FROM scratch
+FROM alpine:3.21.0
 
+RUN apk add --no-cache ffmpeg
 COPY --from=build /usr/local/bin/gotunes /usr/local/bin/gotunes
 
 CMD ["gotunes"]
