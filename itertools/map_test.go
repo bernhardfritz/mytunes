@@ -3,15 +3,17 @@ package itertools
 import (
 	"slices"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
-func addOne(a int) int {
-	return a + 1
-}
-
 func TestMap(t *testing.T) {
-	want := []int{2, 3, 4}
-	if got := slices.Collect(Map(addOne, slices.Values([]int{1, 2, 3}))); !slices.Equal(got, want) {
-		t.Errorf("Map(addOne, slices.Values([]int{1, 2, 3})) = %v, want %v", got, want)
+	addOne := func(a int) int {
+		return a + 1
 	}
+	iterator := slices.Values([]int{1, 2, 3})
+
+	mapped := slices.Collect(Map(addOne, iterator))
+
+	assert.Equal(t, mapped, []int{2, 3, 4})
 }

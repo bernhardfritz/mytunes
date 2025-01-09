@@ -3,15 +3,17 @@ package itertools
 import (
 	"slices"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
-func isOdd(a int) bool {
-	return a%2 == 1
-}
-
 func TestFilter(t *testing.T) {
-	want := []int{1, 3}
-	if got := slices.Collect(Filter(isOdd, slices.Values([]int{1, 2, 3}))); !slices.Equal(got, want) {
-		t.Errorf("Filter(isOdd, slices.Values([]int{1, 2, 3})) = %v, want %v", got, want)
+	isOdd := func(a int) bool {
+		return a%2 == 1
 	}
+	iterator := slices.Values([]int{1, 2, 3})
+
+	filtered := slices.Collect(Filter(isOdd, iterator))
+
+	assert.Equal(t, []int{1, 3}, filtered)
 }
