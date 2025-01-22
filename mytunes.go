@@ -11,7 +11,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/bernhardfritz/gotunes/itertools"
+	"github.com/bernhardfritz/mytunes/itertools"
 )
 
 type Playlist struct {
@@ -59,7 +59,7 @@ func interceptor(res http.ResponseWriter, req *http.Request) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		dirEntries, err := os.ReadDir(filepath.Join("/var/lib/gotunes", filepath.Dir(req.URL.Path)))
+		dirEntries, err := os.ReadDir(filepath.Join("/var/lib/mytunes", filepath.Dir(req.URL.Path)))
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -75,8 +75,8 @@ func interceptor(res http.ResponseWriter, req *http.Request) {
 	} else if strings.HasSuffix(req.URL.Path, ".m3u8") {
 		// TODO refactor-extract into dedicated function e.g. serveStream
 		relativePath := strings.TrimSuffix(req.URL.Path, ".m3u8")
-		input := filepath.Join("/var/lib/gotunes", relativePath)
-		tmpDir := filepath.Join(os.TempDir(), "gotunes")
+		input := filepath.Join("/var/lib/mytunes", relativePath)
+		tmpDir := filepath.Join(os.TempDir(), "mytunes")
 		output := filepath.Join(tmpDir, relativePath)
 		err := os.MkdirAll(filepath.Dir(output), 0660)
 		if err != nil {
@@ -89,10 +89,10 @@ func interceptor(res http.ResponseWriter, req *http.Request) {
 			log.Fatal(err)
 		}
 		log.Println(string(out))
-		http.FileServer(http.Dir(tmpDir)).ServeHTTP(res, req) // TODO http.FileServer(http.Dir("/tmp/gotunes")) can be initialized in main and passed to interceptor as parameter or use the receiver pattern see apiHandler in example of https://pkg.go.dev/net/http#ServeMux.Handle | use os.TempDir() to find the actual dir
+		http.FileServer(http.Dir(tmpDir)).ServeHTTP(res, req) // TODO http.FileServer(http.Dir("/tmp/mytunes")) can be initialized in main and passed to interceptor as parameter or use the receiver pattern see apiHandler in example of https://pkg.go.dev/net/http#ServeMux.Handle | use os.TempDir() to find the actual dir
 	} else if strings.HasSuffix(req.URL.Path, ".ts") {
 		// TODO refactor-extract into dedicated function e.g. serveSegment
-		tmpDir := filepath.Join(os.TempDir(), "gotunes")
+		tmpDir := filepath.Join(os.TempDir(), "mytunes")
 		http.FileServer(http.Dir(tmpDir)).ServeHTTP(res, req)
 	} else {
 		http.NotFound(res, req)

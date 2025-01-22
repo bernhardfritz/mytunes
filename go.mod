@@ -1,4 +1,4 @@
-module github.com/bernhardfritz/gotunes
+module github.com/bernhardfritz/mytunes
 
 go 1.23.2
 

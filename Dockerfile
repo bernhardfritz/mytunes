@@ -1,6 +1,6 @@
 FROM golang:1.23.2 AS build
 
-WORKDIR /usr/src/gotunes
+WORKDIR /usr/src/mytunes
 
 # pre-copy/cache go.mod for pre-downloading dependencies and only redownloading them in subsequent builds if they change
 COPY go.mod go.sum ./
@@ -12,6 +12,6 @@ RUN go build -v -o /usr/local/bin ./...
 FROM alpine:3.21.0
 
 RUN apk add --no-cache ffmpeg
-COPY --from=build /usr/local/bin/gotunes /usr/local/bin/gotunes
+COPY --from=build /usr/local/bin/mytunes /usr/local/bin/mytunes
 
-CMD ["gotunes"]
+CMD ["mytunes"]
