@@ -6,12 +6,12 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestNegate(t *testing.T) {
+func TestNot(t *testing.T) {
 	isOdd := func(a int) bool {
 		return a%2 == 1
 	}
 
-	isEven := Negate(isOdd)
+	isEven := Not(isOdd)
 
 	assert.False(t, isEven(1))
 	assert.True(t, isEven(2))
