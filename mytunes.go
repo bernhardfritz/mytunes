@@ -79,7 +79,7 @@ func interceptor(res http.ResponseWriter, req *http.Request) {
 		playlist := Playlist{
 			Path:        path.Dir(req.URL.Path),
 			Directories: slices.Collect(itertools.Map(os.DirEntry.Name, itertools.Filter(os.DirEntry.IsDir, slices.Values(dirEntries)))),
-			Files:       slices.Collect(itertools.Map(os.DirEntry.Name, itertools.Filter(itertools.Not(os.DirEntry.IsDir), slices.Values(dirEntries)))), // TODO filter files that do not end with .mp3
+			Files:       slices.Collect(itertools.Filter(itertools.HasSuffix(".mp3"), itertools.Map(os.DirEntry.Name, itertools.Filter(itertools.Not(os.DirEntry.IsDir), slices.Values(dirEntries))))),
 		}
 		err = tmpl.Execute(res, playlist)
 		if err != nil {
