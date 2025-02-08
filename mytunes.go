@@ -1,6 +1,7 @@
 package main
 
 import (
+	"io/fs"
 	"log"
 	"net/http"
 	"os"
@@ -53,7 +54,7 @@ func localRedirect(w http.ResponseWriter, r *http.Request, newPath string) {
 	w.WriteHeader(http.StatusMovedPermanently)
 }
 
-func interceptor(res http.ResponseWriter, req *http.Request) {
+func handleRoot(res http.ResponseWriter, req *http.Request) {
 	if containsDotDot(req.URL.Path) {
 		http.Error(res, "invalid URL path", http.StatusBadRequest)
 		return
@@ -64,36 +65,56 @@ func interceptor(res http.ResponseWriter, req *http.Request) {
 	}
 
 	if strings.HasSuffix(req.URL.Path, "/index.m3u") {
-		// TODO refactor-extract into dedicated function e.g. serveWildcardSlashIndexDotM3u
 		funcMap := template.FuncMap{
 			"PathJoin": path.Join,
 		}
-		tmpl, err := template.New("index.m3u").Funcs(funcMap).ParseFiles("index.m3u") // TODO template can be parsed in main and passed to interceptor as parameter or use the receiver pattern see apiHandler in example of: https://pkg.go.dev/net/http#ServeMux.Handle
+		tmpl, err := template.New("index.m3u").Funcs(funcMap).ParseFiles("index.m3u")
 		if err != nil {
 			log.Fatal(err)
 		}
-		dirEntries, err := os.ReadDir(filepath.Join("/var/lib/mytunes", filepath.Dir(req.URL.Path))) // TODO prefer http.Dir("/var/lib/mytunes").Open(filepath.Dir(req.URL.Path)).Readdir(-1) instead
+		dir := http.Dir("/var/lib/mytunes")
+		f, err := dir.Open(filepath.Dir(req.URL.Path))
 		if err != nil {
-			log.Fatal(err)
+			http.NotFound(res, req)
+			return
+		}
+		defer f.Close()
+		fileInfos, err := f.Readdir(-1)
+		if err != nil {
+			http.NotFound(res, req)
+			return
 		}
 		playlist := Playlist{
 			Path:        path.Dir(req.URL.Path),
-			Directories: slices.Collect(itertools.Map(os.DirEntry.Name, itertools.Filter(os.DirEntry.IsDir, slices.Values(dirEntries)))),
-			Files:       slices.Collect(itertools.Filter(itertools.HasSuffix(".mp3"), itertools.Map(os.DirEntry.Name, itertools.Filter(itertools.Not(os.DirEntry.IsDir), slices.Values(dirEntries))))),
+			Directories: slices.Collect(itertools.Map(fs.FileInfo.Name, itertools.Filter(fs.FileInfo.IsDir, slices.Values(fileInfos)))),
+			Files:       slices.Collect(itertools.Filter(itertools.HasSuffix(".mp3"), itertools.Map(fs.FileInfo.Name, itertools.Filter(itertools.Not(fs.FileInfo.IsDir), slices.Values(fileInfos))))),
 		}
 		err = tmpl.Execute(res, playlist)
 		if err != nil {
 			log.Fatal(err)
 		}
 	} else if strings.HasSuffix(req.URL.Path, ".m3u8") {
-		// TODO refactor-extract into dedicated function e.g. serveWildcardDotM3u8
 		relativePath := strings.TrimSuffix(req.URL.Path, ".m3u8")
-		// TODO validate that relativePath ends with .mp3
-		// TODO validate that file actually exists
+		if !strings.HasSuffix(relativePath, ".mp3") {
+			http.NotFound(res, req)
+			return
+		}
+		dir := http.Dir("/var/lib/mytunes")
+		f, err := dir.Open(relativePath)
+		if err != nil {
+			http.NotFound(res, req)
+			return
+		}
+		defer f.Close()
+		_, err = f.Stat()
+		if err != nil {
+			http.NotFound(res, req)
+			return
+		}
 		input := filepath.Join("/var/lib/mytunes", relativePath)
 		tmpDir := filepath.Join(os.TempDir(), "mytunes")
 		output := filepath.Join(tmpDir, relativePath)
-		err := os.MkdirAll(filepath.Dir(output), 0660)
+		err = os.MkdirAll(filepath.Dir(output), 0660)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -104,27 +125,26 @@ func interceptor(res http.ResponseWriter, req *http.Request) {
 			log.Fatal(err)
 		}
 		log.Println(string(out))
-		http.FileServer(http.Dir(tmpDir)).ServeHTTP(res, req) // TODO http.FileServer(http.Dir("/tmp/mytunes")) can be initialized in main and passed to interceptor as parameter or use the receiver pattern see apiHandler in example of https://pkg.go.dev/net/http#ServeMux.Handle | use os.TempDir() to find the actual dir
+		http.FileServer(http.Dir(tmpDir)).ServeHTTP(res, req)
 	} else if strings.HasSuffix(req.URL.Path, ".ts") {
-		// TODO refactor-extract into dedicated function e.g. serveWildcardDotTs
 		tmpDir := filepath.Join(os.TempDir(), "mytunes")
 		http.FileServer(http.Dir(tmpDir)).ServeHTTP(res, req)
 	} else {
-		fs := http.Dir("/var/lib/mytunes")
-		f, err := fs.Open(req.URL.Path)
+		dir := http.Dir("/var/lib/mytunes")
+		f, err := dir.Open(req.URL.Path)
 		if err != nil {
 			http.NotFound(res, req)
 			return
 		}
 		defer f.Close()
 
-		d, err := f.Stat()
+		fileInfo, err := f.Stat()
 		if err != nil {
 			http.NotFound(res, req)
 			return
 		}
 
-		if d.IsDir() {
+		if fileInfo.IsDir() {
 			url := req.URL.Path
 			// redirect if the directory name doesn't end in a slash
 			if url == "" || url[len(url)-1] != '/' {
@@ -138,6 +158,6 @@ func interceptor(res http.ResponseWriter, req *http.Request) {
 }
 
 func main() {
-	http.Handle("GET /", loggingHandler(http.HandlerFunc(interceptor)))
+	http.Handle("GET /", loggingHandler(http.HandlerFunc(handleRoot)))
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
