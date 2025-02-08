@@ -1,0 +1,6 @@
+{
+  "go.alternateTools": {
+    "go": "/usr/local/go/bin/go"
+  },
+  "go.toolsGopath": "/usr/src/mytunes/.vscode/godev"
+}
