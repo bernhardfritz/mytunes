@@ -1,8 +1,6 @@
 package main
 
 import (
-	"crypto/sha256"
-	"crypto/subtle"
 	"io/fs"
 	"log"
 	"net/http"
@@ -14,7 +12,6 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/alexedwards/scs/v2"
 	"github.com/bernhardfritz/mytunes/itertools"
 )
 
@@ -24,40 +21,10 @@ type Playlist struct {
 	Files       []string
 }
 
-var sessionManager *scs.SessionManager
-
-func logger(handler http.Handler) http.Handler {
+func loggingHandler(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
 		log.Println(req.Method, req.RemoteAddr, req.URL.Path)
 		handler.ServeHTTP(res, req)
-	})
-}
-
-func basicAuth(next http.HandlerFunc) http.HandlerFunc {
-	return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
-		username, password, ok := req.BasicAuth()
-		if ok {
-			usernameHash := sha256.Sum256([]byte(username))
-			passwordHash := sha256.Sum256([]byte(password))
-			expectedUsernameHash := sha256.Sum256([]byte("admin"))
-			expectedPasswordHash := sha256.Sum256([]byte(os.Getenv("MYTUNES_PASSWORD")))
-			usernameMatch := (subtle.ConstantTimeCompare(usernameHash[:], expectedUsernameHash[:]) == 1)
-			passwordMatch := (subtle.ConstantTimeCompare(passwordHash[:], expectedPasswordHash[:]) == 1)
-			if usernameMatch && passwordMatch {
-				sessionManager.Put(req.Context(), "authenticated", true)
-				next.ServeHTTP(res, req)
-				return
-			}
-		}
-
-		authenticated := sessionManager.GetBool(req.Context(), "authenticated")
-		if authenticated {
-			next.ServeHTTP(res, req)
-			return
-		}
-
-		res.Header().Set("WWW-Authenticate", `Basic realm="restricted", charset="UTF-8"`)
-		http.Error(res, "Unauthorized", http.StatusUnauthorized)
 	})
 }
 
@@ -191,11 +158,6 @@ func handleRoot(res http.ResponseWriter, req *http.Request) {
 }
 
 func main() {
-	mytunesPassword := os.Getenv("MYTUNES_PASSWORD")
-	if mytunesPassword == "" {
-		log.Fatal("The MYTUNES_PASSWORD environment variable is empty or not set.")
-	}
-	sessionManager = scs.New()
-	http.Handle("GET /", logger(sessionManager.LoadAndSave(basicAuth(http.HandlerFunc(handleRoot)))))
+	http.Handle("GET /", loggingHandler(http.HandlerFunc(handleRoot)))
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
