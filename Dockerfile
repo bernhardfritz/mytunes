@@ -9,9 +9,14 @@ RUN go mod download && go mod verify
 COPY . .
 RUN go build -v -o /usr/local/bin ./...
 
-FROM alpine:3.21.0
+FROM build AS dev
+RUN apt-get -y update && apt-get install -y --no-install-recommends ffmpeg && mkdir -p /var/lib/mytunes && ln -s /usr/src/mytunes/index.m3u /var/lib/mytunes/index.m3u
 
-RUN apk add --no-cache ffmpeg
-COPY --from=build /usr/local/bin/mytunes /usr/local/bin/mytunes
+FROM debian:bookworm-slim
+
+RUN apt-get -y update && apt-get install -y --no-install-recommends ffmpeg
+COPY --from=build /usr/local/bin/mytunes /usr/local/bin/
+COPY index.m3u /var/lib/mytunes/
 
 CMD ["mytunes"]
+EXPOSE 8080

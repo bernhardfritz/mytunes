@@ -1,0 +1,21 @@
+---
+include:
+  - traefik/docker-compose.yaml
+services:
+  mytunes:
+    container_name: mytunes
+    build: .
+    volumes:
+      - ./data:/var/lib/mytunes/data:ro
+    networks:
+      - proxy
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.mytunes-https.tls=true
+      - traefik.http.routers.mytunes-https.tls.certresolver=duckdns
+      - traefik.http.routers.mytunes-https.entrypoints=websecure
+      - traefik.http.routers.mytunes-https.rule=Host(`mytunes.changeme.duckdns.org`)
+    restart: unless-stopped
+networks:
+  proxy:
+    external: true

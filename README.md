@@ -1,19 +1,33 @@
 # mytunes
 
+## Configuration
+
+```yaml
+# traefik/config/traefik.yaml
+      email: "changeme@gmail.com"
+```
+
+```yaml
+# traefik/.env
+DUCKDNS_TOKEN = 'changeme'
+```
+
+```yaml
+# docker-compose.yaml
+      - traefik.http.routers.mytunes-https.rule=Host(`mytunes.changeme.duckdns.org`)
+```
+
 ## Usage
 
 ```bash
-docker build -t mytunes .
-docker run -it --rm --name mytunes -v ~/Music/mytunes:/var/lib/mytunes mytunes
+docker network create proxy
+docker compose up -d
 ```
 
 ## Development
 
 ```bash
-docker build -t mytunes --target build .
-docker run -it --rm --name mytunes -v ~/Music/mytunes:/var/lib/mytunes -v "$PWD":/usr/src/mytunes -v "$PWD"/.vscode-server:/root/.vscode-server -v "$PWD"/.vscode/godev:/usr/src/mytunes/.vscode/godev mytunes
-apt update
-apt install ffmpeg
+docker compose -f docker-compose.dev.yaml up -d
 ```
 
 ```bash

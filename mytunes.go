@@ -68,11 +68,11 @@ func handleRoot(res http.ResponseWriter, req *http.Request) {
 		funcMap := template.FuncMap{
 			"PathJoin": path.Join,
 		}
-		tmpl, err := template.New("index.m3u").Funcs(funcMap).ParseFiles("index.m3u")
+		tmpl, err := template.New("index.m3u").Funcs(funcMap).ParseFiles("/var/lib/mytunes/index.m3u")
 		if err != nil {
 			log.Fatal(err)
 		}
-		dir := http.Dir("/var/lib/mytunes")
+		dir := http.Dir("/var/lib/mytunes/data")
 		f, err := dir.Open(filepath.Dir(req.URL.Path))
 		if err != nil {
 			http.NotFound(res, req)
@@ -99,7 +99,7 @@ func handleRoot(res http.ResponseWriter, req *http.Request) {
 			http.NotFound(res, req)
 			return
 		}
-		dir := http.Dir("/var/lib/mytunes")
+		dir := http.Dir("/var/lib/mytunes/data")
 		f, err := dir.Open(relativePath)
 		if err != nil {
 			http.NotFound(res, req)
@@ -111,7 +111,7 @@ func handleRoot(res http.ResponseWriter, req *http.Request) {
 			http.NotFound(res, req)
 			return
 		}
-		input := filepath.Join("/var/lib/mytunes", relativePath)
+		input := filepath.Join("/var/lib/mytunes/data", relativePath)
 		tmpDir := filepath.Join(os.TempDir(), "mytunes")
 		output := filepath.Join(tmpDir, relativePath)
 		err = os.MkdirAll(filepath.Dir(output), 0660)
@@ -130,7 +130,7 @@ func handleRoot(res http.ResponseWriter, req *http.Request) {
 		tmpDir := filepath.Join(os.TempDir(), "mytunes")
 		http.FileServer(http.Dir(tmpDir)).ServeHTTP(res, req)
 	} else {
-		dir := http.Dir("/var/lib/mytunes")
+		dir := http.Dir("/var/lib/mytunes/data")
 		f, err := dir.Open(req.URL.Path)
 		if err != nil {
 			http.NotFound(res, req)

@@ -1,0 +1,26 @@
+---
+services:
+  reverse-proxy:
+    # The official v3 Traefik docker image
+    image: traefik:v3.3.4
+    container_name: reverse-proxy
+    ports:
+      # The HTTP port
+      - "80:80"
+      # The HTTPS port
+      - "443:443"
+      # The Web UI (enabled by --api.insecure=true)
+      - "8080:8080"
+    environment:
+      - DUCKDNS_TOKEN=${DUCKDNS_TOKEN}
+    volumes:
+      # So that Traefik can listen to the Docker events
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./config/traefik.yaml:/etc/traefik/traefik.yaml:ro
+      - ./data/certs/:/var/traefik/certs/:rw
+    restart: unless-stopped
+    networks:
+      - proxy
+networks:
+  proxy:
+    external: true

@@ -1,0 +1,15 @@
+---
+services:
+  mytunes:
+    container_name: mytunes-dev
+    build:
+      context: .
+      target: dev
+    volumes:
+      - ./data:/var/lib/mytunes/data:ro
+      - ./:/usr/src/mytunes
+      - ./.vscode-server:/root/.vscode-server
+      - ./.vscode/godev:/usr/src/mytunes/.vscode/godev
+    command: tail -f /dev/null
+    ports:
+      - "8080:8080"

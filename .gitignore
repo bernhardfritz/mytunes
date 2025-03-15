@@ -26,3 +26,8 @@ go.work.sum
 
 .vscode-server/
 .vscode/godev/
+
+traefik/data/
+
+data/*
+!data/.gitkeep
