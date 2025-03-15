@@ -1,6 +1,6 @@
 ---
 services:
-  mytunes:
+  mytunes-dev:
     container_name: mytunes-dev
     build:
       context: .
