@@ -13,3 +13,5 @@ services:
     command: tail -f /dev/null
     ports:
       - "8080:8080"
+    environment:
+    - MYTUNES_KEY=${MYTUNES_KEY}

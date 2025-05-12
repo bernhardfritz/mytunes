@@ -17,6 +17,8 @@ services:
       - traefik.http.routers.mytunes-https.rule=Host(`mytunes.changeme.duckdns.org`)
       - traefik.http.routers.mytunes-https.middlewares=traefik-forward-auth
     restart: unless-stopped
+    environment:
+      - MYTUNES_KEY=${MYTUNES_KEY}
 networks:
   proxy:
     external: true

@@ -17,6 +17,7 @@ FROM debian:bookworm-slim
 RUN apt-get -y update && apt-get install -y --no-install-recommends ffmpeg
 COPY --from=build /usr/local/bin/mytunes /usr/local/bin/
 COPY index.m3u /var/lib/mytunes/
+COPY index.html /var/lib/mytunes/
 
 CMD ["mytunes"]
 EXPOSE 8080

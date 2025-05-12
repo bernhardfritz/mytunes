@@ -24,14 +24,14 @@ services:
   traefik-forward-auth:
     image: thomseddon/traefik-forward-auth:v2.2.0
     container_name: traefik-forward-auth
+    command:
+      - --rule.mytunes.action=allow
+      - --rule.mytunes.rule=Host(`mytunes.changeme.duckdns.org`)&&Path(`/_vlc`)
     environment:
-      - DEFAULT_PROVIDER=generic-oauth
-      - PROVIDERS_GENERIC_OAUTH_AUTH_URL=https://discord.com/oauth2/authorize
-      - PROVIDERS_GENERIC_OAUTH_TOKEN_URL=https://discord.com/api/oauth2/token
-      - PROVIDERS_GENERIC_OAUTH_USER_URL=https://discord.com/api/users/@me
-      - PROVIDERS_GENERIC_OAUTH_CLIENT_ID=${PROVIDERS_DISCORD_CLIENT_ID}
-      - PROVIDERS_GENERIC_OAUTH_CLIENT_SECRET=${PROVIDERS_DISCORD_CLIENT_SECRET}
-      - PROVIDERS_GENERIC_OAUTH_SCOPE=identify,email
+      - DEFAULT_PROVIDER=oidc
+      - PROVIDERS_OIDC_ISSUER_URL=https://accounts.google.com
+      - PROVIDERS_OIDC_CLIENT_ID=${PROVIDERS_OIDC_CLIENT_ID}
+      - PROVIDERS_OIDC_CLIENT_SECRET=${PROVIDERS_OIDC_CLIENT_SECRET}
       - SECRET=${SECRET}
       - LOG_LEVEL=debug
       - WHITELIST=${WHITELIST}

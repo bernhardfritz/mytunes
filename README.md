@@ -7,11 +7,11 @@
       email: "changeme@gmail.com"
 ```
 
-```yaml
+```bash
 # traefik/.env
 DUCKDNS_TOKEN = 'changeme'
-PROVIDERS_DISCORD_CLIENT_ID = 'changeme' # https://discord.com/developers/applications
-PROVIDERS_DISCORD_CLIENT_SECRET = 'changeme'
+PROVIDERS_OIDC_CLIENT_ID = 'changeme' # https://console.developers.google.com/auth/clients
+PROVIDERS_OIDC_CLIENT_SECRET = 'changeme'
 SECRET = 'changeme' # openssl rand -hex 16
 WHITELIST = 'changeme'
 ```
@@ -20,13 +20,19 @@ WHITELIST = 'changeme'
 # docker-compose.yaml
       - traefik.http.routers.mytunes-https.rule=Host(`mytunes.changeme.duckdns.org`)
 ```
-Go to https://discord.com/developers/applications
 
-Create a new application for mytunes
+```yaml
+# traefik/docker-compose.yaml
+      - --rule.mytunes.rule=Host(`mytunes.changeme.duckdns.org`)&&Path(`/_vlc`)
+```
 
-Go to OAuth2 settings
+Go to https://console.developers.google.com/auth/clients (or any other [OIDC](https://openid.net/developers/how-connect-works/) provider of your choice)
 
-Set `https://mytunes.changeme.duckdns.org/_oauth` as redirect URL
+Create a new OAuth 2.0 Client for mytunes
+
+Select Application type "Web application"
+
+Add `https://mytunes.changeme.duckdns.org/_oauth` to Authorised redirect URIs
 
 ## Usage
 
@@ -34,6 +40,8 @@ Set `https://mytunes.changeme.duckdns.org/_oauth` as redirect URL
 docker network create proxy
 docker compose up -d
 ```
+
+Open in browser: https://mytunes.changeme.duckdns.org/
 
 ## Development
 
@@ -49,8 +57,4 @@ go test ./...
 go run .
 ```
 
-## FAQ
-
-### Why choose Discord over other OAuth2 providers?
-
-Discord allows to register redirect URLs with custom URL schemes like `vlc://`.
+Open in VLC: http://localhost:8080/index.m3u
