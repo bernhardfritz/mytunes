@@ -10,7 +10,7 @@ services:
       # The HTTPS port
       - "443:443"
       # The Web UI (enabled by --api.insecure=true)
-      - "8080:8080"
+      # - "8080:8080"
     environment:
       - DUCKDNS_TOKEN=${DUCKDNS_TOKEN}
     volumes:
