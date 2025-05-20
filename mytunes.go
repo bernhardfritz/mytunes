@@ -24,16 +24,24 @@ type Playlist struct {
 }
 
 type Context struct {
-	tss *internal.TransientSessionStorage
+	tss       *internal.TransientSessionStorage
+	indexM3u  *template.Template
+	indexHtml *htmlTemplate.Template
 }
 
-func NewContext(tss *internal.TransientSessionStorage) *Context {
-	return &Context{tss: tss}
+func NewContext(tss *internal.TransientSessionStorage, indexM3u *template.Template, indexHtml *htmlTemplate.Template) *Context {
+	return &Context{
+		tss:       tss,
+		indexM3u:  indexM3u,
+		indexHtml: indexHtml,
+	}
 }
 
 type Page struct {
-	Host  string
-	Token string
+	Host    string
+	Token   string
+	Android bool
+	Chrome  bool
 }
 
 func loggingHandler(handler http.Handler) http.Handler {
@@ -90,19 +98,15 @@ func (ctx *Context) handleRoot(res http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		tmpl, err := htmlTemplate.New("index.html").ParseFiles("/var/lib/mytunes/index.html")
-		if err != nil {
-			log.Println(err)
-			http.Error(res, "Internal server error", http.StatusInternalServerError)
-			return
-		}
-
+		userAgent := req.Header.Get("User-Agent")
 		page := Page{
-			Host:  req.Header.Get("X-Forwarded-Host"),
-			Token: cookieToken,
+			Host:    req.Header.Get("X-Forwarded-Host"),
+			Token:   cookieToken,
+			Android: strings.Contains(userAgent, "Android"),
+			Chrome:  strings.Contains(userAgent, "Chrome"),
 		}
 
-		err = tmpl.Execute(res, page)
+		err = ctx.indexHtml.Execute(res, page)
 		if err != nil {
 			log.Println(err)
 			http.Error(res, "Internal server error", http.StatusInternalServerError)
@@ -139,15 +143,6 @@ func (ctx *Context) handleRoot(res http.ResponseWriter, req *http.Request) {
 		}
 
 		if strings.HasSuffix(req.URL.Path, "/index.m3u") {
-			funcMap := template.FuncMap{
-				"PathJoin": path.Join,
-			}
-			tmpl, err := template.New("index.m3u").Funcs(funcMap).ParseFiles("/var/lib/mytunes/index.m3u")
-			if err != nil {
-				log.Println(err)
-				http.Error(res, "Internal server error", http.StatusInternalServerError)
-				return
-			}
 			dir := http.Dir("/var/lib/mytunes/data")
 			f, err := dir.Open(filepath.Dir(req.URL.Path))
 			if err != nil {
@@ -167,7 +162,7 @@ func (ctx *Context) handleRoot(res http.ResponseWriter, req *http.Request) {
 				Directories: slices.Collect(itertools.Map(fs.FileInfo.Name, itertools.Filter(fs.FileInfo.IsDir, slices.Values(fileInfos)))),
 				Files:       slices.Collect(itertools.Filter(itertools.HasSuffix(".mp3"), itertools.Map(fs.FileInfo.Name, itertools.Filter(itertools.Not(fs.FileInfo.IsDir), slices.Values(fileInfos))))),
 			}
-			err = tmpl.Execute(res, playlist)
+			err = ctx.indexM3u.Execute(res, playlist)
 			if err != nil {
 				log.Println(err)
 				http.Error(res, "Internal server error", http.StatusInternalServerError)
@@ -266,7 +261,20 @@ func main() {
 	}
 	defer tss.Close()
 
-	ctx := NewContext(tss)
+	funcMap := template.FuncMap{
+		"PathJoin": path.Join,
+	}
+	indexM3u, err := template.New("index.m3u").Funcs(funcMap).ParseFiles("/var/lib/mytunes/index.m3u")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	indexHtml, err := htmlTemplate.New("index.html").ParseFiles("/var/lib/mytunes/index.html")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	ctx := NewContext(tss, indexM3u, indexHtml)
 	http.Handle("GET /", loggingHandler(http.HandlerFunc(ctx.handleRoot)))
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
