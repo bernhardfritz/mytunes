@@ -21,6 +21,11 @@ WHITELIST = 'changeme@gmail.com'
       - --rule.mytunes.rule=Host(`mytunes.changeme.duckdns.org`)&&Path(`/_vlc`)
 ```
 
+```bash
+# .env
+MYTUNES_KEY = 'changeme' # openssl rand -hex 16
+```
+
 ```yaml
 # docker-compose.yaml
       - traefik.http.routers.mytunes-https.rule=Host(`mytunes.changeme.duckdns.org`)
