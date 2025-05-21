@@ -260,6 +260,10 @@ func main() {
 		log.Fatal(err)
 	}
 	defer tss.Close()
+	err = tss.Initialize()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	funcMap := template.FuncMap{
 		"PathJoin": path.Join,
