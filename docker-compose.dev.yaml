@@ -6,7 +6,7 @@ services:
       context: .
       target: dev
     volumes:
-      - ./data:/var/lib/mytunes/data:ro
+      - ./data:/var/lib/mytunes:ro
       - ./:/usr/src/mytunes
       - ./.vscode-server:/root/.vscode-server
       - ./.vscode/godev:/usr/src/mytunes/.vscode/godev

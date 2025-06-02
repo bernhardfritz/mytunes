@@ -10,14 +10,12 @@ COPY . .
 RUN go build -v -o /usr/local/bin ./...
 
 FROM build AS dev
-RUN apt-get -y update && apt-get install -y --no-install-recommends ffmpeg && mkdir -p /var/lib/mytunes && ln -s /usr/src/mytunes/index.m3u /var/lib/mytunes/index.m3u && ln -s /usr/src/mytunes/index.html /var/lib/mytunes/index.html
+RUN apt-get -y update && apt-get install -y --no-install-recommends ffmpeg && mkdir -p /var/lib/mytunes
 
 FROM debian:bookworm-slim
 
-RUN apt-get -y update && apt-get install -y --no-install-recommends ffmpeg
+RUN apt-get -y update && apt-get install -y --no-install-recommends ffmpeg && mkdir -p /var/lib/mytunes
 COPY --from=build /usr/local/bin/mytunes /usr/local/bin/
-COPY index.m3u /var/lib/mytunes/
-COPY index.html /var/lib/mytunes/
 
-CMD ["mytunes"]
+CMD ["mytunes", "/var/lib/mytunes"]
 EXPOSE 8080

@@ -17,7 +17,7 @@ type TransientSessionStorage struct {
 }
 
 func NewTransientSessionStorage(encde *Encde) (*TransientSessionStorage, error) {
-	db, err := sql.Open("sqlite3", "/var/lib/mytunes/mytunes.db")
+	db, err := sql.Open("sqlite3", ":memory:")
 	if err != nil {
 		return nil, err
 	}

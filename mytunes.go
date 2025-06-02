@@ -1,6 +1,7 @@
 package main
 
 import (
+	_ "embed"
 	htmlTemplate "html/template"
 	"io/fs"
 	"log"
@@ -27,13 +28,15 @@ type Context struct {
 	tss       *internal.TransientSessionStorage
 	indexM3u  *template.Template
 	indexHtml *htmlTemplate.Template
+	musicDir  string
 }
 
-func NewContext(tss *internal.TransientSessionStorage, indexM3u *template.Template, indexHtml *htmlTemplate.Template) *Context {
+func NewContext(tss *internal.TransientSessionStorage, indexM3u *template.Template, indexHtml *htmlTemplate.Template, musicDir string) *Context {
 	return &Context{
 		tss:       tss,
 		indexM3u:  indexM3u,
 		indexHtml: indexHtml,
+		musicDir:  musicDir,
 	}
 }
 
@@ -143,7 +146,7 @@ func (ctx *Context) handleRoot(res http.ResponseWriter, req *http.Request) {
 		}
 
 		if strings.HasSuffix(req.URL.Path, "/index.m3u") {
-			dir := http.Dir("/var/lib/mytunes/data")
+			dir := http.Dir(ctx.musicDir)
 			f, err := dir.Open(filepath.Dir(req.URL.Path))
 			if err != nil {
 				log.Println(err)
@@ -173,7 +176,7 @@ func (ctx *Context) handleRoot(res http.ResponseWriter, req *http.Request) {
 				http.NotFound(res, req)
 				return
 			}
-			dir := http.Dir("/var/lib/mytunes/data")
+			dir := http.Dir(ctx.musicDir)
 			f, err := dir.Open(relativePath)
 			if err != nil {
 				log.Println(err)
@@ -191,7 +194,7 @@ func (ctx *Context) handleRoot(res http.ResponseWriter, req *http.Request) {
 				http.NotFound(res, req)
 				return
 			}
-			input := filepath.Join("/var/lib/mytunes/data", relativePath)
+			input := filepath.Join(ctx.musicDir, relativePath)
 			tmpDir := filepath.Join(os.TempDir(), "mytunes")
 			output := filepath.Join(tmpDir, relativePath)
 			err = os.MkdirAll(filepath.Dir(output), 0660)
@@ -214,7 +217,7 @@ func (ctx *Context) handleRoot(res http.ResponseWriter, req *http.Request) {
 			tmpDir := filepath.Join(os.TempDir(), "mytunes")
 			http.FileServer(http.Dir(tmpDir)).ServeHTTP(res, req)
 		} else {
-			dir := http.Dir("/var/lib/mytunes/data")
+			dir := http.Dir(ctx.musicDir)
 			f, err := dir.Open(req.URL.Path)
 			if err != nil {
 				log.Println(err)
@@ -244,7 +247,26 @@ func (ctx *Context) handleRoot(res http.ResponseWriter, req *http.Request) {
 	}
 }
 
+//go:embed index.html
+var indexHtmlEmbedded string
+
+//go:embed index.m3u
+var indexM3uEmbedded string
+
 func main() {
+	if len(os.Args) > 2 {
+		log.Fatal("Usage: mytunes [PATH]")
+	}
+	var musicDir string
+	if len(os.Args) == 2 {
+		musicDir = os.Args[1]
+	} else {
+		home, err := os.UserHomeDir()
+		if err != nil {
+			log.Fatal(err)
+		}
+		musicDir = filepath.Join(home, "Music")
+	}
 	mytunesKey := os.Getenv("MYTUNES_KEY")
 	if mytunesKey == "" {
 		log.Fatal("The MYTUNES_KEY environment variable is empty or not set.")
@@ -268,17 +290,17 @@ func main() {
 	funcMap := template.FuncMap{
 		"PathJoin": path.Join,
 	}
-	indexM3u, err := template.New("index.m3u").Funcs(funcMap).ParseFiles("/var/lib/mytunes/index.m3u")
+	indexM3u, err := template.New("index.m3u").Funcs(funcMap).Parse(indexM3uEmbedded)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	indexHtml, err := htmlTemplate.New("index.html").ParseFiles("/var/lib/mytunes/index.html")
+	indexHtml, err := htmlTemplate.New("index.html").Parse(indexHtmlEmbedded)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	ctx := NewContext(tss, indexM3u, indexHtml)
+	ctx := NewContext(tss, indexM3u, indexHtml, musicDir)
 	http.Handle("GET /", loggingHandler(http.HandlerFunc(ctx.handleRoot)))
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

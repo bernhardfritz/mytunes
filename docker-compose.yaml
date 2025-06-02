@@ -6,7 +6,7 @@ services:
     container_name: mytunes
     build: .
     volumes:
-      - ./data:/var/lib/mytunes/data:ro
+      - ./data:/var/lib/mytunes:ro
     networks:
       - proxy
     labels:
