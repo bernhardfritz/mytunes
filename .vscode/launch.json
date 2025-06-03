@@ -10,7 +10,8 @@
         "request": "launch",
         "mode": "auto",
         "program": "${fileDirname}",
-        "buildFlags": ["-buildvcs=false"]
+        "buildFlags": ["-buildvcs=false"],
+        "args": ["/var/lib/mytunes"]
     }
   ]
 }

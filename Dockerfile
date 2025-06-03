@@ -1,4 +1,4 @@
-FROM golang:1.23.2 AS build
+FROM golang:1.23.2-alpine AS build
 
 WORKDIR /usr/src/mytunes
 
@@ -7,14 +7,14 @@ COPY go.mod go.sum ./
 RUN go mod download && go mod verify
 
 COPY . .
-RUN go build -v -o /usr/local/bin ./...
+RUN apk add --update gcc musl-dev && CGO_ENABLED=1 go build -v -o /usr/local/bin ./...
 
 FROM build AS dev
-RUN apt-get -y update && apt-get install -y --no-install-recommends ffmpeg && mkdir -p /var/lib/mytunes
+RUN apk add --no-cache ffmpeg && mkdir -p /var/lib/mytunes
 
-FROM debian:bookworm-slim
+FROM alpine:3.22.0
 
-RUN apt-get -y update && apt-get install -y --no-install-recommends ffmpeg && mkdir -p /var/lib/mytunes
+RUN apk add --no-cache ffmpeg && mkdir -p /var/lib/mytunes
 COPY --from=build /usr/local/bin/mytunes /usr/local/bin/
 
 CMD ["mytunes", "/var/lib/mytunes"]
