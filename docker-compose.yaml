@@ -1,6 +1,7 @@
 ---
 include:
   - traefik/docker-compose.yaml
+  - mytunes-portal/docker-compose.yaml
 services:
   mytunes:
     container_name: mytunes
@@ -17,8 +18,6 @@ services:
       - traefik.http.routers.mytunes-https.rule=Host(`mytunes.changeme.duckdns.org`)
       - traefik.http.routers.mytunes-https.middlewares=traefik-forward-auth
     restart: unless-stopped
-    environment:
-      - MYTUNES_KEY=${MYTUNES_KEY}
 networks:
   proxy:
     external: true

@@ -7,7 +7,7 @@ COPY go.mod go.sum ./
 RUN go mod download && go mod verify
 
 COPY . .
-RUN apk add --update gcc musl-dev && CGO_ENABLED=1 go build -v -o /usr/local/bin ./...
+RUN go build -v -o /usr/local/bin ./...
 
 FROM build AS dev
 RUN apk add --no-cache ffmpeg && mkdir -p /var/lib/mytunes

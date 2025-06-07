@@ -2,6 +2,16 @@
 
 ## Configuration
 
+```bash
+# mytunes-portal/.env
+MYTUNES_PORTAL_KEY = 'changeme' # openssl rand -hex 16
+```
+
+```yaml
+# mytunes-portal/docker-compose.yaml
+      - traefik.http.routers.mytunes-portal-https.rule=(Host(`mytunes.changeme.duckdns.org`)&&Path(`/`))||(Host(`mytunes.changeme.duckdns.org`)&&Path(`/_vlc`))
+```
+
 ```yaml
 # traefik/config/traefik.yaml
       email: "changeme@gmail.com"
@@ -19,11 +29,6 @@ WHITELIST = 'changeme@gmail.com'
 ```yaml
 # traefik/docker-compose.yaml
       - --rule.mytunes.rule=Host(`mytunes.changeme.duckdns.org`)&&Path(`/_vlc`)
-```
-
-```bash
-# .env
-MYTUNES_KEY = 'changeme' # openssl rand -hex 16
 ```
 
 ```yaml

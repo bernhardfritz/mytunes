@@ -1,0 +1,20 @@
+---
+services:
+  mytunes-portal:
+    container_name: mytunes-portal
+    build: .
+    networks:
+      - proxy
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.mytunes-portal-https.tls=true
+      - traefik.http.routers.mytunes-portal-https.tls.certresolver=duckdns
+      - traefik.http.routers.mytunes-portal-https.entrypoints=websecure
+      - traefik.http.routers.mytunes-portal-https.rule=(Host(`mytunes.changeme.duckdns.org`)&&Path(`/`))||(Host(`mytunes.changeme.duckdns.org`)&&Path(`/_vlc`))
+      - traefik.http.routers.mytunes-portal-https.middlewares=traefik-forward-auth
+    restart: unless-stopped
+    environment:
+      - MYTUNES_PORTAL_KEY=${MYTUNES_PORTAL_KEY}
+networks:
+  proxy:
+    external: true
