@@ -13,5 +13,5 @@ FROM alpine:3.22.0
 
 COPY --from=build /usr/local/bin/mytunes-portal /usr/local/bin/
 
-CMD ["mytunes-portal", "/var/lib/mytunes-portal"]
+CMD ["mytunes-portal"]
 EXPOSE 8080
