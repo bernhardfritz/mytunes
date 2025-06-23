@@ -1,4 +1,23 @@
-FROM golang:1.23.2-alpine AS build
+FROM --platform=$BUILDPLATFORM golang:1.23.2-alpine AS build
+ARG TARGETOS
+ARG TARGETARCH
+ARG TARGETVARIANT
+
+WORKDIR /tmp
+RUN if [ "${TARGETARCH}" = "arm" ]; then \
+      if [ "${TARGETVARIANT}" = "v5" ] || [ "${TARGETVARIANT}" = "v6" ]; then \
+        FFMPEGARCH="armel"; \
+      else \
+        FFMPEGARCH="armhf"; \
+      fi; \
+    else \
+      FFMPEGARCH="${TARGETARCH}"; \
+    fi; \
+    wget "https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-${FFMPEGARCH}-static.tar.xz" \
+    && wget "https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-${FFMPEGARCH}-static.tar.xz.md5" \
+    && md5sum -c "ffmpeg-release-${FFMPEGARCH}-static.tar.xz.md5" \
+    && tar xvf "ffmpeg-release-${FFMPEGARCH}-static.tar.xz" \
+    && mv */ffmpeg /usr/local/bin/
 
 WORKDIR /usr/src/mytunes
 
@@ -7,14 +26,16 @@ COPY go.mod go.sum ./
 RUN go mod download && go mod verify
 
 COPY . .
-RUN go build -v -o /usr/local/bin ./...
+RUN GOOS=${TARGETOS}; \
+    GOARCH=${TARGETARCH}; \
+    if [ "${TARGETARCH}" = "arm" ] && [ "${TARGETVARIANT}" ]; then \
+        GOARM="${TARGETVARIANT#v}"; \
+    fi; \
+    go build -v -o /usr/local/bin ./...
 
-FROM build AS dev
-RUN apk add --no-cache ffmpeg && mkdir -p /var/lib/mytunes
+FROM scratch 
 
-FROM alpine:3.22.0
-
-RUN apk add --no-cache ffmpeg && mkdir -p /var/lib/mytunes
+COPY --from=build /usr/local/bin/ffmpeg /usr/local/bin/
 COPY --from=build /usr/local/bin/mytunes /usr/local/bin/
 
 CMD ["mytunes", "/var/lib/mytunes"]

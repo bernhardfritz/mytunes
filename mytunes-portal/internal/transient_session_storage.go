@@ -7,7 +7,7 @@ import (
 	"log"
 	"time"
 
-	_ "github.com/mattn/go-sqlite3"
+	_ "modernc.org/sqlite"
 )
 
 type TransientSessionStorage struct {
@@ -17,7 +17,7 @@ type TransientSessionStorage struct {
 }
 
 func NewTransientSessionStorage(encde *Encde) (*TransientSessionStorage, error) {
-	db, err := sql.Open("sqlite3", ":memory:")
+	db, err := sql.Open("sqlite", ":memory:")
 	if err != nil {
 		return nil, err
 	}

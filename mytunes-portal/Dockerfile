@@ -1,4 +1,7 @@
-FROM golang:1.23.2-alpine AS build
+FROM --platform=$BUILDPLATFORM golang:1.23.2-alpine AS build
+ARG TARGETOS
+ARG TARGETARCH
+ARG TARGETVARIANT
 
 WORKDIR /usr/src/mytunes-portal
 
@@ -7,9 +10,14 @@ COPY go.mod go.sum ./
 RUN go mod download && go mod verify
 
 COPY . .
-RUN apk add --update gcc musl-dev && CGO_ENABLED=1 go build -v -o /usr/local/bin ./...
+RUN GOOS=${TARGETOS}; \
+    GOARCH=${TARGETARCH}; \
+    if [ "${TARGETARCH}" = "arm" ] && [ "${TARGETVARIANT}" ]; then \
+        GOARM="${TARGETVARIANT#v}"; \
+    fi; \
+    go build -v -o /usr/local/bin ./...
 
-FROM alpine:3.22.0
+FROM scratch
 
 COPY --from=build /usr/local/bin/mytunes-portal /usr/local/bin/
 

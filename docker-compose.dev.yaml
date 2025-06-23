@@ -4,7 +4,7 @@ services:
     container_name: mytunes-dev
     build:
       context: .
-      target: dev
+      target: build
     volumes:
       - ./data:/var/lib/mytunes:ro
       - ./:/usr/src/mytunes

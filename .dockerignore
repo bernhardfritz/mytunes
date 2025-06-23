@@ -1,0 +1,7 @@
+.git/
+.vscode/godev/
+.vscode-server/
+data/
+mytunes-portal/
+traefik/
+.env
