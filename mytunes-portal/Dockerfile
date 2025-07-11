@@ -10,13 +10,7 @@ COPY go.mod go.sum ./
 RUN go mod download && go mod verify
 
 COPY . .
-RUN GOOS=${TARGETOS}; \
-    GOARCH=${TARGETARCH}; \
-    if [ "${TARGETARCH}" = "arm" ] && [ "${TARGETVARIANT}" ]; then \
-        GOARM="${TARGETVARIANT#v}"; \
-    fi; \
-    CGO_ENABLED=0; \
-    go build -v -o /usr/local/bin ./...
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=arm GOARM=6 go build -v -o /usr/local/bin ./...
 
 FROM scratch
 
