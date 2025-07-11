@@ -26,7 +26,7 @@ COPY go.mod go.sum ./
 RUN go mod download && go mod verify
 
 COPY . .
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=arm GOARM=6 go build -v -o /usr/local/bin ./...
+RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} GOARM=${TARGETVARIANT#v} go build -v -o /usr/local/bin ./...
 
 FROM scratch 
 
