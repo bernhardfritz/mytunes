@@ -44,6 +44,14 @@ Select Application type "Web application"
 
 Add `https://mytunes.example.com/_oauth` to Authorised redirect URIs
 
+### ARM-specific adaptions
+
+```diff
+# traefik/docker-compose.yaml
+-   image: thomseddon/traefik-forward-auth:v2.2.0
++   image: thomseddon/traefik-forward-auth:2.2.0-arm
+```
+
 ## Usage
 
 ```bash
