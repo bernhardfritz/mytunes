@@ -6,6 +6,7 @@ include:
 services:
   mytunes:
     container_name: mytunes
+    image: bernhardfritz/mytunes:latest
     build: .
     volumes:
       - ./data:/var/lib/mytunes:ro

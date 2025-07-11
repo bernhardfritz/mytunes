@@ -2,6 +2,7 @@
 services:
   mytunes-portal:
     container_name: mytunes-portal
+    image: bernhardfritz/mytunes-portal:latest
     build: .
     networks:
       - proxy
