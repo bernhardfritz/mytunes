@@ -17,17 +17,14 @@ entryPoints:
   websecure:
     address: :443
 certificatesResolvers:
-  duckdns:
+  cloudflare:
     acme:
       email: "changeme@gmail.com"
-      storage: /var/traefik/certs/duckdns-acme.json
+      storage: /var/traefik/certs/cloudflare-acme.json
       caServer: 'https://acme-v02.api.letsencrypt.org/directory'
       keyType: EC256
       dnsChallenge:
-        provider: duckdns
-        resolvers:
-          - "1.1.1.1:53"
-          - "8.8.8.8:53"
+        provider: cloudflare
 providers:
   docker:
     endpoint: "unix:///var/run/docker.sock"

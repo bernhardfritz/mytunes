@@ -2,6 +2,7 @@
 include:
   - traefik/docker-compose.yaml
   - mytunes-portal/docker-compose.yaml
+  - cloudflared/docker-compose.yaml
 services:
   mytunes:
     container_name: mytunes
@@ -13,9 +14,9 @@ services:
     labels:
       - traefik.enable=true
       - traefik.http.routers.mytunes-https.tls=true
-      - traefik.http.routers.mytunes-https.tls.certresolver=duckdns
+      - traefik.http.routers.mytunes-https.tls.certresolver=cloudflare
       - traefik.http.routers.mytunes-https.entrypoints=websecure
-      - traefik.http.routers.mytunes-https.rule=Host(`mytunes.changeme.duckdns.org`)
+      - traefik.http.routers.mytunes-https.rule=Host(`mytunes.example.com`)
       - traefik.http.routers.mytunes-https.middlewares=traefik-forward-auth
     restart: unless-stopped
 networks:

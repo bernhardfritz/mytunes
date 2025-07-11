@@ -9,7 +9,7 @@ MYTUNES_PORTAL_KEY = 'changeme' # openssl rand -hex 16
 
 ```yaml
 # mytunes-portal/docker-compose.yaml
-      - traefik.http.routers.mytunes-portal-https.rule=(Host(`mytunes.changeme.duckdns.org`)&&Path(`/`))||(Host(`mytunes.changeme.duckdns.org`)&&Path(`/_vlc`))
+      - traefik.http.routers.mytunes-portal-https.rule=(Host(`mytunes.example.com`)&&Path(`/`))||(Host(`mytunes.example.com`)&&Path(`/_vlc`))
 ```
 
 ```yaml
@@ -19,7 +19,7 @@ MYTUNES_PORTAL_KEY = 'changeme' # openssl rand -hex 16
 
 ```bash
 # traefik/.env
-DUCKDNS_TOKEN = 'changeme'
+CF_DNS_API_TOKEN = 'changeme' # API token with DNS:Edit permission
 PROVIDERS_OIDC_CLIENT_ID = 'changeme' # https://console.developers.google.com/auth/clients
 PROVIDERS_OIDC_CLIENT_SECRET = 'changeme'
 SECRET = 'changeme' # openssl rand -hex 16
@@ -28,12 +28,12 @@ WHITELIST = 'changeme@gmail.com'
 
 ```yaml
 # traefik/docker-compose.yaml
-      - --rule.mytunes.rule=Host(`mytunes.changeme.duckdns.org`)&&Path(`/_vlc`)
+      - --rule.mytunes.rule=Host(`mytunes.example.com`)&&Path(`/_vlc`)
 ```
 
 ```yaml
 # docker-compose.yaml
-      - traefik.http.routers.mytunes-https.rule=Host(`mytunes.changeme.duckdns.org`)
+      - traefik.http.routers.mytunes-https.rule=Host(`mytunes.example.com`)
 ```
 
 Go to https://console.developers.google.com/auth/clients (or any other [OIDC](https://openid.net/developers/how-connect-works/) provider of your choice)
@@ -42,7 +42,7 @@ Create a new OAuth 2.0 Client for mytunes
 
 Select Application type "Web application"
 
-Add `https://mytunes.changeme.duckdns.org/_oauth` to Authorised redirect URIs
+Add `https://mytunes.example.com/_oauth` to Authorised redirect URIs
 
 ## Usage
 
@@ -51,7 +51,7 @@ docker network create proxy
 docker compose up -d
 ```
 
-Open in browser: https://mytunes.changeme.duckdns.org/
+Open in browser: https://mytunes.example.com/
 
 ## Development
 

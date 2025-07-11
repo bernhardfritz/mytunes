@@ -1,0 +1,12 @@
+---
+services:
+  cloudflared:
+    build: .
+    networks:
+      - proxy
+    restart: unless-stopped
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
+networks:
+  proxy:
+    external: true

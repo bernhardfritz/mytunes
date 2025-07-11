@@ -12,7 +12,7 @@ services:
       # The Web UI (enabled by --api.insecure=true)
       # - "8080:8080"
     environment:
-      - DUCKDNS_TOKEN=${DUCKDNS_TOKEN}
+      - CF_DNS_API_TOKEN=${CF_DNS_API_TOKEN}
     volumes:
       # So that Traefik can listen to the Docker events
       - /var/run/docker.sock:/var/run/docker.sock
@@ -26,7 +26,7 @@ services:
     container_name: traefik-forward-auth
     command:
       - --rule.mytunes.action=allow
-      - --rule.mytunes.rule=Host(`mytunes.changeme.duckdns.org`)&&Path(`/_vlc`)
+      - --rule.mytunes.rule=Host(`mytunes.example.com`)&&Path(`/_vlc`)
     environment:
       - DEFAULT_PROVIDER=oidc
       - PROVIDERS_OIDC_ISSUER_URL=https://accounts.google.com
