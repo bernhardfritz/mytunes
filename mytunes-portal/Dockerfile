@@ -15,6 +15,7 @@ RUN GOOS=${TARGETOS}; \
     if [ "${TARGETARCH}" = "arm" ] && [ "${TARGETVARIANT}" ]; then \
         GOARM="${TARGETVARIANT#v}"; \
     fi; \
+    CGO_ENABLED=0; \
     go build -v -o /usr/local/bin ./...
 
 FROM scratch
