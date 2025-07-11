@@ -6,6 +6,6 @@
     <title>mytunes-portal</title>
 </head>
 <body>
-    <a href="{{ if and .Android .Chrome }}intent://{{.Host}}/_vlc?token={{.Token}}#Intent;scheme=vlc;action=android.intent.action.VIEW;package=org.videolan.vlc;end;{{ else }}/_vlc?token={{.Token}}{{ end }}">Open in VLC</a> | <a href="/_oauth/logout">Logout</a>
+    <a href="{{ if and .Android .Chrome }}intent://{{.Host}}/_vlc?token={{.Token}}#Intent;type=application/vnd.apple.mpegurl;scheme=https;action=android.intent.action.VIEW;package=org.videolan.vlc;end;{{ else }}/_vlc?token={{.Token}}{{ end }}">Open in VLC</a> | <a href="/_oauth/logout">Logout</a>
 </body>
 </html>
