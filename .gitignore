@@ -27,6 +27,11 @@ go.work.sum
 .vscode-server/
 .vscode/godev/
 
+crowdsec/config/*
+!crowdsec/config/appsec-configs/
+!crowdsec/config/appsec-configs/my_rules.yaml
+!crowdsec/config/acquis.yaml
+crowdsec/data/
 traefik/data/
 
 data/*

@@ -1,12 +1,16 @@
 ---
 services:
   cloudflared:
+    container_name: cloudflared
     build: .
     networks:
-      - proxy
+      proxy:
+        ipv4_address: 172.18.0.42
     restart: unless-stopped
     environment:
       - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
+    labels:
+      - "traefik.enable=false"
 networks:
   proxy:
     external: true

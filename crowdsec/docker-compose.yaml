@@ -1,0 +1,22 @@
+---
+services:
+  crowdsec:
+    image: crowdsecurity/crowdsec:v1.6.11-slim
+    container_name: crowdsec
+    networks:
+      - proxy
+    restart: unless-stopped
+    environment:
+      COLLECTIONS: crowdsecurity/traefik
+      APPSEC_RULES: crowdsecurity/base-config
+      CUSTOM_HOSTNAME: crowdsec
+      BOUNCER_KEY_TRAEFIK: ${BOUNCER_KEY_TRAEFIK}
+    volumes:
+      - ../traefik/data/logs/:/var/log/traefik/:ro
+      - ./data/:/var/lib/crowdsec/data/
+      - ./config/:/etc/crowdsec/
+    labels:
+      - "traefik.enable=false"
+networks:
+  proxy:
+    external: true

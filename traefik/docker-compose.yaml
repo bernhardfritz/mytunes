@@ -18,9 +18,12 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./config/traefik.yaml:/etc/traefik/traefik.yaml:ro
       - ./data/certs/:/var/traefik/certs/:rw
+      - ./data/logs/:/var/log/traefik/:rw
     restart: unless-stopped
     networks:
       - proxy
+    depends_on:
+      - crowdsec
   traefik-forward-auth:
     image: thomseddon/traefik-forward-auth:v2.2.0
     container_name: traefik-forward-auth

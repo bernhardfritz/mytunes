@@ -3,6 +3,7 @@ include:
   - traefik/docker-compose.yaml
   - mytunes-portal/docker-compose.yaml
   - cloudflared/docker-compose.yaml
+  - crowdsec/docker-compose.yaml
 services:
   mytunes:
     container_name: mytunes
@@ -18,7 +19,12 @@ services:
       - traefik.http.routers.mytunes-https.tls.certresolver=cloudflare
       - traefik.http.routers.mytunes-https.entrypoints=websecure
       - traefik.http.routers.mytunes-https.rule=Host(`mytunes.example.com`)
-      - traefik.http.routers.mytunes-https.middlewares=traefik-forward-auth
+      - "traefik.http.routers.mytunes-https.middlewares=crowdsec@docker, traefik-forward-auth"
+      - traefik.http.middlewares.crowdsec.plugin.bouncer.enabled=true
+      - traefik.http.middlewares.crowdsec.plugin.bouncer.crowdseclapikey=${BOUNCER_KEY_TRAEFIK}
+      - traefik.http.middlewares.crowdsec.plugin.bouncer.loglevel=DEBUG
+      - traefik.http.middlewares.crowdsec.plugin.bouncer.crowdsecappsecenabled=true
+      - traefik.http.middlewares.crowdsec.plugin.bouncer.crowdsecappsechost=crowdsec:7422
     restart: unless-stopped
 networks:
   proxy:

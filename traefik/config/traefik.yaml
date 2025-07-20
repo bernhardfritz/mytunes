@@ -16,6 +16,9 @@ entryPoints:
           scheme: https
   websecure:
     address: :443
+    forwardedHeaders:
+      trustedIPs:
+        - "172.18.0.42"
 certificatesResolvers:
   cloudflare:
     acme:
@@ -29,3 +32,10 @@ providers:
   docker:
     endpoint: "unix:///var/run/docker.sock"
     exposedByDefault: false
+accessLog:
+  filePath: /var/log/traefik/access.log
+experimental:
+  plugins:
+    bouncer:
+      moduleName: github.com/maxlerebourg/crowdsec-bouncer-traefik-plugin
+      version: v1.4.4
