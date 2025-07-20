@@ -1,7 +1,9 @@
 .git/
+.github/
 .vscode/godev/
 .vscode-server/
 cloudflared/
+crowdsec/
 data/
 mytunes-portal/
 traefik/

@@ -3,8 +3,14 @@
 ## Configuration
 
 ```bash
+# crowdsec/.env
+BOUNCER_KEY_TRAEFIK = 'changeme' # openssl rand -hex 16
+```
+
+```bash
 # mytunes-portal/.env
 MYTUNES_PORTAL_KEY = 'changeme' # openssl rand -hex 16
+BOUNCER_KEY_TRAEFIK = 'changeme' # openssl rand -hex 16
 ```
 
 ```yaml
@@ -29,6 +35,11 @@ WHITELIST = 'changeme@gmail.com'
 ```yaml
 # traefik/docker-compose.yaml
       - --rule.mytunes.rule=Host(`mytunes.example.com`)&&Path(`/_vlc`)
+```
+
+```bash
+# .env
+BOUNCER_KEY_TRAEFIK = 'changeme' # openssl rand -hex 16
 ```
 
 ```yaml

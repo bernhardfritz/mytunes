@@ -12,7 +12,12 @@ services:
       - traefik.http.routers.mytunes-portal-https.tls.certresolver=cloudflare
       - traefik.http.routers.mytunes-portal-https.entrypoints=websecure
       - traefik.http.routers.mytunes-portal-https.rule=(Host(`mytunes.example.com`)&&Path(`/`))||(Host(`mytunes.example.com`)&&Path(`/_vlc`))
-      - traefik.http.routers.mytunes-portal-https.middlewares=traefik-forward-auth
+      - "traefik.http.routers.mytunes-portal-https.middlewares=crowdsec@docker, traefik-forward-auth"
+      - traefik.http.middlewares.crowdsec.plugin.bouncer.enabled=true
+      - traefik.http.middlewares.crowdsec.plugin.bouncer.crowdseclapikey=${BOUNCER_KEY_TRAEFIK}
+      - traefik.http.middlewares.crowdsec.plugin.bouncer.loglevel=DEBUG
+      - traefik.http.middlewares.crowdsec.plugin.bouncer.crowdsecappsecenabled=true
+      - traefik.http.middlewares.crowdsec.plugin.bouncer.crowdsecappsechost=crowdsec:7422
     restart: unless-stopped
     environment:
       - MYTUNES_PORTAL_KEY=${MYTUNES_PORTAL_KEY}
