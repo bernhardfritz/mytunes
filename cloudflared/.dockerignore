@@ -1,1 +1,3 @@
+config/cert.pem
+config/*.json
 .env

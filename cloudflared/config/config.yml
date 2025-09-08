@@ -1,0 +1,10 @@
+tunnel: 00000000-0000-0000-0000-000000000000
+credentials-file: /.cloudflared/00000000-0000-0000-0000-000000000000.json
+ingress:
+  - hostname: mytunes.example.com
+    originRequest:
+      noTLSVerify: true
+    service: https://reverse-proxy
+  - service: http_status:404
+warp-routing:
+  enabled: false

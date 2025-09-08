@@ -2,6 +2,28 @@
 
 ## Configuration
 
+Go to https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/do-more-with-tunnels/local-management/create-local-tunnel/ and follow instructions to create a locally-managed tunnel.
+
+```yaml
+# cloudflared/config/config.yml
+tunnel: 00000000-0000-0000-0000-000000000000
+credentials-file: /.cloudflared/00000000-0000-0000-0000-000000000000.json
+ingress:
+  - hostname: mytunes.example.com
+```
+
+Go to https://dash.cloudflare.com/
+
+Select your domain
+
+Go to DNS > Records
+
+Add a new CNAME record for your newly created tunnel:
+
+| Type  | Name | Target                                                | Proxy status |
+| ----- | ---- | ----------------------------------------------------- | ------------ |
+| CNAME | \*   | 00000000-0000-0000-0000-000000000000.cfargotunnel.com | Proxied      |
+
 ```bash
 # crowdsec/.env
 BOUNCER_KEY_TRAEFIK = 'changeme' # openssl rand -hex 16
@@ -15,12 +37,12 @@ BOUNCER_KEY_TRAEFIK = 'changeme' # openssl rand -hex 16
 
 ```yaml
 # mytunes-portal/docker-compose.yaml
-      - traefik.http.routers.mytunes-portal-https.rule=(Host(`mytunes.example.com`)&&Path(`/`))||(Host(`mytunes.example.com`)&&Path(`/_vlc`))
+- traefik.http.routers.mytunes-portal-https.rule=(Host(`mytunes.example.com`)&&Path(`/`))||(Host(`mytunes.example.com`)&&Path(`/_vlc`))
 ```
 
 ```yaml
 # traefik/config/traefik.yaml
-      email: "changeme@gmail.com"
+email: "changeme@gmail.com"
 ```
 
 ```bash
@@ -34,7 +56,7 @@ WHITELIST = 'changeme@gmail.com'
 
 ```yaml
 # traefik/docker-compose.yaml
-      - --rule.mytunes.rule=Host(`mytunes.example.com`)&&Path(`/_vlc`)
+- --rule.mytunes.rule=Host(`mytunes.example.com`)&&Path(`/_vlc`)
 ```
 
 ```bash
@@ -44,7 +66,7 @@ BOUNCER_KEY_TRAEFIK = 'changeme' # openssl rand -hex 16
 
 ```yaml
 # docker-compose.yaml
-      - traefik.http.routers.mytunes-https.rule=Host(`mytunes.example.com`)
+- traefik.http.routers.mytunes-https.rule=Host(`mytunes.example.com`)
 ```
 
 Go to https://console.developers.google.com/auth/clients (or any other [OIDC](https://openid.net/developers/how-connect-works/) provider of your choice)

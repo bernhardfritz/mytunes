@@ -36,3 +36,6 @@ traefik/data/
 
 data/*
 !data/.gitkeep
+
+cloudflared/config/cert.pem
+cloudflared/config/*.json
